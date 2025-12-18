@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e6f7ff;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #cceeff;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      padding: 15px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      font-family: fantasy;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
+    .sidebar a {
+      display: block;
+      width: 90%;
+      margin: 10px 0;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: left;
+      text-decoration: none;
+      color: black;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      background: #b3e6ff;
+    }
+
+    /* Topbar */
+    .topbar {
+      margin-left: 250px;
+      padding: 10px;
+      background: #cceeff;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .logout { background: #999; color: #fff; }
+    .exit { background: #e74c3c; color: #fff; }
+    .shutdown { background: #27ae60; color: #fff; }
+
+    /* Main */
+    .main {
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .main h1 {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+
+    .main img {
+      width: 100%;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>STUDENT MENU</h2>
+    <a href="book_room.html">🏠 Book Room</a>
+    <a href="attendance.html">📋 My Attendance</a>
+    <a href="leave_request.html">📄 Request Leave</a>
+    <a href="rules.html">📜 Hostel Rules</a>
+    <a href="contact_recter.html">📧 Contact Recter</a>
+    <a href="Food_court.html">🏠 Food court</a>
+  </div>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <button class="logout" onclick="logout()">Logout</button>
+    <button class="exit" onclick="exitApp()">Exit</button>
+    <button class="shutdown" onclick="shutdown()">Shut Down</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <h1>Welcome Student 🎓</h1>
+    <img src="img/girls-hostel-corridor-view.jpg" alt="Hostel Image">
+  </div>
+
+  <!-- JS -->
+  <script>
+    function logout() {
+      alert("You have logged out!");
+      window.location.href = "login.html";
+    }
+
+    function exitApp() {
+      alert("Exit clicked! (This will close in desktop app, not browser)");
+      window.close();
+    }
+
+    function shutdown() {
+      alert("System Shutdown Triggered!");
+    }
+  </script>
+
+</body>
+</html>

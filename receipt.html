@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt PDF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  body { text-align:center; padding:30px; font-family:Arial; }
+  button { background:#28a745; color:white; border:none; padding:12px; width:250px; font-size:16px; border-radius:5px; cursor:pointer; }
+</style>
+</head>
+<body>
+<h2>Download Room Booking Receipt</h2>
+<button onclick="makePDF()">Download PDF</button>
+
+<script>
+function makePDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  
+  // Error 2: The entire doc.text block was written inside the doc.text function call, 
+  // causing syntax errors. It needs to be moved outside.
+  
+  // Error 3: Local storage retrieval is risky. We should wrap it in a try/catch or an if check.
+  const allBookingsJSON = localStorage.getItem("allBookings");
+  
+  if (!allBookingsJSON) {
+      alert("No booking data found in local storage!");
+      return; // Stop execution if no data
+  }
+  
+  try {
+    console.log("Before parse")
+      const bookings = JSON.parse(allBookingsJSON);
+    console.log("After parse")
+      // Error 4 (Logic): The code accessed the last item in the bookings array // without checking if it exists. We check array length > 0.
+      if (bookings.length === 0) {
+          alert("Booking list is empty!");
+          return;
+      }
+      console.log("bookings", bookings)
+      // Logic: Get the last booked item
+      const b = bookings[bookings.length - 1]; 
+      console.log("b",b)
+      // Error 5: Missing template literal backticks (`) and incorrect variable interpolation.
+      // The original code used double quotes (") instead of backticks (`) for template literals.
+
+      // Error 6: Text content was directly placed outside the doc.text() call 
+      // inside the function definition, causing a syntax error.
+
+      doc.setFontSize(18); 
+      doc.text("Room Booking Receipt", 70, 20);
+
+      doc.setFontSize(14); 
+      
+      // Error 7, 8, 9 (Syntax): Correct use of template literals (backticks `) 
+      // and interpolation (${...}) is required for this dynamic text.
+
+      doc.text(`Name: ${b.studentName}`, 20, 50); 
+      doc.text(`Student ID: ${b.studentId}`, 20, 60); 
+      doc.text(`Block: ${b.block}`, 20, 70); 
+      doc.text(`Room: ${b.selectedRoom}`, 20, 80); 
+      doc.text(`Room Type: ${b.roomType}`, 20, 90); 
+      doc.text(`Amount Paid: ₹${b.amount}`, 20, 100);
+
+      doc.save("Room_Receipt.pdf"); 
+
+  } catch (e) {
+      // Logic improvement for Error 3: Handle JSON parsing errors gracefully
+      alert("Error parsing booking data from local storage: " + e.message);
+  }
+} 
+</script>
+
+</body>
+</html>

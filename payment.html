@@ -1,0 +1,29 @@
+<!-- QR Payment Page (payment.html) --><!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QR Payment</title>
+<style>
+  body { font-family: Arial; background:#f5f5f5; padding:20px; text-align:center; }
+  .box { background:#fff; padding:20px; width:350px; margin:auto; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+  img { width:250px; }
+  input { width:100%; padding:10px; margin-top:10px; border:1px solid #ccc; border-radius:5px; }
+  button { background:#28a745; color:white; border:none; padding:12px; width:100%; font-size:16px; border-radius:5px; cursor:pointer; margin-top:15px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>Scan & Pay</h2>
+  <img src="img/WhatsApp Image 2025-11-15 at 14.53.26_eb5cc354.jpg" alt="QR Code">
+  <input type="file" id="screenshot" accept="image/*">
+  <button onclick="uploadPayment()">Submit Payment</button>
+</div>
+<script>
+function uploadPayment(){
+  const file = document.getElementById("screenshot").files[0];
+  if(!file){ alert("Please upload screenshot"); return; }
+  localStorage.setItem("paymentStatus","success");
+  window.location.href = "success.html";
+}
+</script>
+</body>
+</html>

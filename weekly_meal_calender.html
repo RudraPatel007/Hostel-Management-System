@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weekly Veg Meal Calendar</title>
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#ffffff; --accent:#007bff; --muted:#6b7280;
+      --breakfast:#fff7e6; --lunch:#e8f7ef; --dinner:#eef2ff;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); margin:0; padding:28px}
+    .wrap{max-width:1100px; margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+    h1{font-size:20px;margin:0;color:#0f172a}
+    .controls{display:flex;gap:10px;align-items:center}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+    button.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,123,255,0.15)}
+    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+    .day{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.06);min-height:160px;display:flex;flex-direction:column}
+    .day.today{outline:3px solid rgba(0,123,255,0.08)}
+    .day h3{margin:0 0 8px 0;font-size:15px;color:#0b1220}
+    .meal{padding:8px;border-radius:8px;margin-bottom:8px;font-weight:600}
+    .meal small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:6px}
+    .meal.breakfast{background:var(--breakfast)}
+    .meal.lunch{background:var(--lunch)}
+    .meal.dinner{background:var(--dinner)}/* responsive */
+@media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.grid{grid-template-columns:repeat(1,1fr)} header{flex-direction:column;align-items:flex-start} .controls{width:100%; justify-content:space-between}}
+
+/* tiny footer */
+.footer{margin-top:14px;color:var(--muted);font-size:13px}
+
+/* edit modal */
+.modal{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .panel{background:#fff;padding:18px;border-radius:10px;max-width:520px;width:100%}
+.form-row{display:flex;gap:8px;margin-bottom:10px}
+.form-row input, .form-row select{flex:1;padding:8px;border:1px solid #ddd;border-radius:6px}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Weekly Veg Meal Calendar — Normal Style</h1>
+      <div class="controls">
+        <button id="editBtn">Edit Day</button>
+        <button id="downloadBtn" class="secondary">Download JSON</button>
+        <button id="printBtn" class="secondary">Print</button>
+      </div>
+    </header><main>
+  <div class="grid" id="calendarGrid" aria-live="polite"></div>
+  <div class="footer">Tip: click <strong>Edit Day</strong> to change a day's meals and save to localStorage.</div>
+</main>
+
+  </div>  <!-- edit modal (hidden) -->  <div id="modal" class="modal hidden" style="display:none">
+    <div class="panel">
+      <h3 id="modalTitle">Edit Meals</h3>
+      <div style="margin-bottom:8px;color:#374151">Day: <strong id="modalDay"></strong></div>
+      <div class="form-row">
+        <input id="breakfastInput" placeholder="Breakfast">
+        <input id="lunchInput" placeholder="Lunch">
+        <input id="dinnerInput" placeholder="Dinner">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button id="saveBtn">Save</button>
+        <button id="closeBtn" class="secondary">Close</button>
+      </div>
+    </div>
+  </div>  <script>
+    // initial veg plan (Normal style) — matches what you approved
+    const defaultMenu = {
+      Sunday:   { Breakfast: 'Poori Bhaji', Lunch: 'Veg Special Thali (Dal, Rice, Sabzi, Roti, Salad)', Dinner: 'Pav Bhaji' },
+      Monday:   { Breakfast: 'Idli Sambar', Lunch: 'Rice, Dal, Mixed Vegetable Curry, Roti', Dinner: 'Veg Pulao, Curd, Pickle' },
+      Tuesday:  { Breakfast: 'Aloo Paratha + Curd', Lunch: 'Rajma Chawal', Dinner: 'Paneer Curry + Naan + Salad' },
+      Wednesday:{ Breakfast: 'Poha', Lunch: 'Lemon Rice + Sambar + Mini Vada', Dinner: 'Khichdi + Ghee + Papad' },
+      Thursday: { Breakfast: 'Bread Butter / Toast', Lunch: 'Chhole Bhature', Dinner: 'Veg Biryani + Raita' },
+      Friday:   { Breakfast: 'Upma', Lunch: 'Rice + Veg Korma + Fry + Roti', Dinner: 'Hakka Noodles / Pasta (Veg)' },
+      Saturday: { Breakfast: 'Masala Dosa', Lunch: 'Dal Bati Churma', Dinner: 'Pizza / Burger (Veg Special)' }
+    };
+
+    const CAL_KEY = 'weeklyVegMenu_v1';
+
+    function loadMenu(){
+      try{
+        const raw = localStorage.getItem(CAL_KEY);
+        if(raw) return JSON.parse(raw);
+      }catch(e){console.warn('load failed',e)}
+      return defaultMenu;
+    }
+
+    function saveMenu(menu){
+      localStorage.setItem(CAL_KEY, JSON.stringify(menu));
+    }
+
+    const menuData = loadMenu();
+
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const grid = document.getElementById('calendarGrid');
+
+    function renderCalendar(){
+      grid.innerHTML = '';
+      const todayIndex = new Date().getDay();
+
+      days.forEach((day,idx)=>{
+        const dayObj = menuData[day] || {Breakfast:'—',Lunch:'—',Dinner:'—'};
+        const el = document.createElement('div');
+        el.className = 'day' + (idx===todayIndex ? ' today' : '');
+
+        el.innerHTML = `
+          <h3>${day}</h3>
+          <div class="meal breakfast"><strong>Breakfast</strong><small>${escapeHtml(dayObj.Breakfast)}</small></div>
+          <div class="meal lunch"><strong>Lunch</strong><small>${escapeHtml(dayObj.Lunch)}</small></div>
+          <div class="meal dinner"><strong>Dinner</strong><small>${escapeHtml(dayObj.Dinner)}</small></div>
+        `;
+
+        grid.appendChild(el);
+      });
+    }
+
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // init
+    renderCalendar();
+
+    // modal logic
+    const modal = document.getElementById('modal');
+    const modalDay = document.getElementById('modalDay');
+    const modalTitle = document.getElementById('modalTitle');
+    const breakfastInput = document.getElementById('breakfastInput');
+    const lunchInput = document.getElementById('lunchInput');
+    const dinnerInput = document.getElementById('dinnerInput');
+
+    let editingDay = null;
+
+    document.getElementById('editBtn').addEventListener('click', ()=>{
+      // open modal with a day selector quick-pick
+      // show a small prompt to choose day (simple approach)
+      const day = prompt('Enter day to edit (Sunday, Monday, ...):', 'Monday');
+      if(!day) return;
+      const d = day.trim();
+      if(!menuData[d]){ alert('Invalid day name. Use exact weekday names.'); return; }
+      editingDay = d;
+      modalDay.textContent = d;
+      const dd = menuData[d];
+      breakfastInput.value = dd.Breakfast;
+      lunchInput.value = dd.Lunch;
+      dinnerInput.value = dd.Dinner;
+      modal.style.display = 'flex';
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', ()=>{ modal.style.display='none'; editingDay=null; });
+
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      if(!editingDay) return;
+      menuData[editingDay] = {
+        Breakfast: breakfastInput.value || '—',
+        Lunch: lunchInput.value || '—',
+        Dinner: dinnerInput.value || '—'
+      };
+      saveMenu(menuData);
+      modal.style.display='none';
+      editingDay = null;
+      renderCalendar();
+      alert('Saved');
+    });
+
+    // download json
+    document.getElementById('downloadBtn').addEventListener('click', ()=>{
+      const dataStr = JSON.stringify(menuData, null, 2);
+      const blob = new Blob([dataStr], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'weekly_veg_menu.json';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    // print
+    document.getElementById('printBtn').addEventListener('click', ()=>{
+      window.print();
+    });
+
+  </script>
+  <br>
+  <a href="student_dashboard.html">⬅ Back to Dashboard</a>
+</body>
+</html>

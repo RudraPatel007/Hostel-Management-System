@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | RaHuDha Hostel</title>
+    <style>
+        /* --- CSS STYLES --- */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6; /* Light background for the overall page */
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar Styling (Left Panel) --- */
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50; /* Dark Blue/Navy for professional look */
+            color: white;
+            padding: 20px 0;
+            position: fixed; /* Keeps sidebar fixed when content scrolls */
+            height: 100%;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            z-index: 20;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #ecf0f1; /* Light text color */
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e; /* Slightly lighter background on hover */
+            color: #ffffff;
+        }
+        
+        .sidebar a.active {
+            background-color: #3498db; /* Blue highlight for active page */
+            font-weight: bold;
+        }
+
+        .sidebar .icon {
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            margin-left: 250px; /* Must match the sidebar width */
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        /* --- Top Bar (Admin Name/Logout) --- */
+        .topbar {
+            background-color: #ffffff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .topbar h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .topbar button {
+            background-color: #e74c3c; /* Red for Logout/Exit */
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .topbar button:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- Content Placeholder (Hostel Image area from sketch) --- */
+        .dashboard-body {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        
+        .dashboard-body h2 {
+            color: #555;
+            margin-top: 0;
+        }
+
+        .hostel-image-placeholder {
+            width: 100%;
+            height: 400px;
+            background-color: #ecf0f1; /* Light gray box for placeholder */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #bdc3c7;
+            border-radius: 6px;
+            font-size: 20px;
+            color: #7f8c8d;
+            margin-top: 15px;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-tools"></i> Admin Menu</h2>
+        </div>
+        
+        <a href="#" class="active" onclick="loadContent('home')">
+            <span class="icon"><i class="fas fa-home"></i></span> Dashboard
+        </a>
+        <a href="#" onclick="loadContent('add_students')">
+            <span class="icon"><i class="fas fa-user-plus"></i></span> Add Students
+        </a>
+        <a href="#" onclick="loadContent('remove_students')">
+            <span class="icon"><i class="fas fa-user-minus"></i></span> Remove Students
+        </a>
+        <a href="#" onclick="loadContent('show_students')">
+            <span class="icon"><i class="fas fa-users"></i></span> Show Students
+        </a>
+        <a href="weekly_meal_calender.html">🏠 Food court</a>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="topbar">
+            <h1>Welcome, Admin!</h1>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div class="dashboard-body">
+            <h2 id="contentTitle">Dashboard Overview</h2>
+            
+            <div id="contentArea">
+                <p>This is the main area where dynamic content (forms, tables, reports) will appear based on the menu selection.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to simulate content loading based on menu item clicked
+        function loadContent(menuItem) {
+            const contentArea = document.getElementById('contentArea');
+            const contentTitle = document.getElementById('contentTitle');
+            const links = document.querySelectorAll('.sidebar a');
+            
+            // Remove 'active' class from all links
+            links.forEach(link => link.classList.remove('active'));
+
+            // Set 'active' class on the clicked link
+            event.currentTarget.classList.add('active');
+            
+            // --- Simple Content Switching Logic ---
+            if (menuItem === 'add_students') {
+                contentTitle.textContent = 'Add New Student Record';
+                contentArea.innerHTML = `
+                    <p>Use this form to register a new student.</p>
+                    <form style="text-align:left; max-width:400px; margin:20px auto; padding:20px; border:1px solid #ddd; border-radius:8px;">
+                        <label>Student ID:</label><input type="text" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px;"><br>
+                        <label>Name:</label><input type="text" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px;"><br>
+                        <label>Room No:</label><input type="text" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:4px;"><br>
+                        <button type="submit" style="background:#27ae60; color:white; padding:10px; border:none; border-radius:4px; cursor:pointer;">Save Student</button>
+                    </form>
+                `;
+            } else if (menuItem === 'show_students') {
+                contentTitle.textContent = 'Student List / Report';
+                contentArea.innerHTML = `
+                    <p>Displaying all registered student data here (e.g., a table with filtering).</p>
+                    <div style="background:#f0f8ff; padding:20px; border-radius:6px;">
+                        [Placeholder for Student Data Table]
+                        <p>Total Students: 50 | Occupied Rooms: 45</p>
+                    </div>
+                `;
+            } else {
+                // Default or Home content
+                contentTitle.textContent = 'Dashboard Overview';
+                contentArea.innerHTML = `
+                    <p>This is the main area where dynamic content (forms, tables, reports) will appear based on the menu selection.</p>
+                    <div class="hostel-image-placeholder">
+                        Hostel Image / Main Admin Panel Content
+                    </div>
+                `;
+            }
+        }
+
+        // Function for Logout button
+        function logout() {
+            alert("Admin Logged Out!");
+            // In a real scenario, you would redirect to the login page:
+            window.location.href = "login.html"; 
+        }
+    </script>
+</body>
+</html>

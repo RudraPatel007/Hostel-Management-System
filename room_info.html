@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Room Details</title>
+    <style>
+        /* CSS is unchanged */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 15px;
+            white-space: nowrap;
+        }
+
+        .form-group input[type="text"] {
+            flex-grow: 1;
+            max-width: 250px;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+            text-transform: uppercase;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #room-details-display {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            text-align: left;
+        }
+
+        #room-details-display h2 {
+            margin-top: 0;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        #room-details-display p {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        #room-details-display p span {
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .error-message {
+            color: red;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Check Your Room Detail</h1>
+        <div class="form-group">
+            <label for="student-id">Student ID:</label>
+            <input type="text" id="student-id" placeholder="Enter Student ID" required>
+        </div>
+        <button id="check-button">Check</button>
+
+        <p id="error-message" class="error-message hidden"></p>
+
+        <div id="room-details-display" class="hidden">
+            </div>
+    </div>
+
+   <script>
+
+const BOOKING_STORAGE_KEY = "allBookings";
+
+const studentIdInput = document.getElementById('student-id');
+const checkButton = document.getElementById('check-button');
+const roomDetailsDisplay = document.getElementById('room-details-display');
+const errorMessage = document.getElementById('error-message');
+
+checkButton.addEventListener('click', () => {
+    
+    const searchId = studentIdInput.value.trim().toUpperCase();
+
+    errorMessage.classList.add('hidden');
+    roomDetailsDisplay.classList.add('hidden');
+    roomDetailsDisplay.innerHTML = '';
+
+    if (searchId === "") {
+        errorMessage.textContent = "Please enter a Student ID.";
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    const storedBookingsJSON = localStorage.getItem(BOOKING_STORAGE_KEY);
+    let allBookings = [];
+    
+    if (!storedBookingsJSON) {
+        errorMessage.textContent = "No booking records found in the system.";
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        allBookings = JSON.parse(storedBookingsJSON);
+    } catch (e) {
+        console.error("Error parsing booking data:", e);
+        errorMessage.textContent = "Error loading booking data.";
+        errorMessage.classList.remove('hidden');
+        return;
+    }
+
+    const studentDetails = allBookings.slice().reverse().find(b => {
+        if (!b || !b.studentId) return false;
+        const storedId = String(b.studentId).trim().toUpperCase();
+        return storedId === searchId;
+    });
+
+    if (studentDetails) {
+
+        let detailsHtml = `
+            <h2>Room Details for ${studentDetails.name || 'N/A'}</h2>
+            <p><span>Student ID:</span> ${studentDetails.studentId || 'N/A'}</p>
+            <p><span>Block:</span> ${studentDetails.block || 'N/A'}</p>
+            <p><span>Room Number:</span> ${studentDetails.roomNumber || 'N/A'}</p>
+            <p><span>Room Type:</span> ${studentDetails.roomType || 'N/A'}</p>
+            <p><span>Fees Paid:</span> ₹${Number(studentDetails.amount).toLocaleString('en-IN')}</p>
+            <p><span>Check-in Date:</span> ${studentDetails.time ? new Date(studentDetails.time).toLocaleString() : "N/A"}</p>
+        `;
+
+        roomDetailsDisplay.innerHTML = detailsHtml;
+        roomDetailsDisplay.classList.remove('hidden');
+
+    } else {
+        errorMessage.textContent = No room details found for Student ID; ${searchId};
+        errorMessage.classList.remove('hidden');
+    }
+});
+</script>
+</body>
+</html>

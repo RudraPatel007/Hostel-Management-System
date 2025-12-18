@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Court Menu Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+            width: 150px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group select {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #menu-display {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+
+        #menu-display h2 {
+            margin-top: 0;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        #menu-display ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #menu-display li {
+            background-color: #fff;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Food Court Meal Selector</h1>
+
+        <form>
+            <div class="form-group">
+                <label for="student-id">Student ID:</label>
+                <input type="text" id="student-id" name="student-id" placeholder="Enter ID" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date-select">Date:</label>
+                <input type="date" id="date-select" name="date-select" required>
+            </div>
+
+            <div class="form-group">
+                <label for="weekday-select">Select Day:</label>
+                <select id="weekday-select" name="weekday-select">
+                    <option value="" disabled selected>Select Week day</option>
+                    <option value="Sunday">Sunday</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                </select>
+            </div>
+
+            <a href="weekly_meal_calender.html"><button type="button" id="check-button">CHECK</button></a>
+            
+        </form>
+
+        <div id="menu-display" class="hidden"></div>
+    </div>
+
+    <script>
+        const weeklyMenu = {
+            Sunday: { Breakfast: "Poori Bhaji", Lunch: "Chicken Curry (Non-veg) / Special Thali (Veg)", Dinner: "Pav Bhaji" },
+            Monday: { Breakfast: "Idli Sambar", Lunch: "Rice, Dal, Mixed Vegetable Curry, Roti", Dinner: "Pulao, Curd, Pickle" },
+            Tuesday: { Breakfast: "Aloo Paratha with Curd", Lunch: "Rajma Chawal", Dinner: "Paneer Curry, Naan, Salad" },
+            Wednesday: { Breakfast: "Poha", Lunch: "Lemon Rice, Sambar, Vada", Dinner: "Khichdi, Ghee, Papad" },
+            Thursday: { Breakfast: "Bread Omelette / Toast & Butter", Lunch: "Chhole Bhature", Dinner: "Vegetable Biryani, Raita" },
+            Friday: { Breakfast: "Upma", Lunch: "Rice, Fish Curry (Non-veg) / Vegetable Korma (Veg), Fry", Dinner: "Pasta or Noodles" },
+            Saturday: { Breakfast: "Masala Dosa", Lunch: "Dal Bati Churma", Dinner: "Pizza or Burger (Special Item)" }
+        };
+
+        const dateSelect = document.getElementById('date-select');
+        const weekdaySelect = document.getElementById('weekday-select');
+        const timeSelect = document.getElementById('time-select');
+        const menuDisplay = document.getElementById('menu-display');
+        const checkBtn = document.getElementById('check-button');
+
+        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+        function updateMenu() {
+            const day = weekdaySelect.value;
+            const time = timeSelect.value;
+
+            if (!day || !time) {
+                menuDisplay.classList.add("hidden");
+                return;
+            }
+
+            const mealItem = weeklyMenu[day][time];
+
+            let html = `
+                <h2>Menu for ${time} on ${day}</h2>
+                <ul>
+                    <li>${mealItem}</li>
+                </ul>
+            `;
+
+            menuDisplay.innerHTML = html;
+            menuDisplay.classList.remove("hidden");
+        }
+
+        function syncDateToDay() {
+            const dateValue = dateSelect.value;
+            if (dateValue) {
+                const date = new Date(dateValue);
+                const selectedDay = daysOfWeek[date.getDay()];
+                weekdaySelect.value = selectedDay;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            dateSelect.value = `${year}-${month}-${day}`;
+            syncDateToDay();
+        });
+
+        dateSelect.addEventListener("change", syncDateToDay);
+
+        checkBtn.addEventListener("click", () => {
+            updateMenu();
+        });
+    </script>
+    <br>
+  <a href="student_dashboard.html">⬅ Back to Dashboard</a>
+</body>
+</html>

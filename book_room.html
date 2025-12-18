@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Book Room</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      background-color: #ffe0e0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      max-width: 920px;
+      margin: auto;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .check-btn { background: #007bff; color: #fff; }
+    .check-btn:hover { background: #0069d9; }
+    .book-btn { background: #28a745; color: #fff; }
+    .book-btn:hover { background: #218838; }
+
+    .legend {
+      margin-top: 12px;
+      padding: 10px;
+      background: #fce4ec;
+      border-radius: 8px;
+      font-size: 14px;
+      display:flex;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+
+    .legend .item { display:flex; gap:8px; align-items:center; }
+
+    .grid {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .block {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      width: 740px;
+      margin: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .block h3 {
+      text-align: center;
+      background: #fce4ec;
+      padding: 6px;
+      border-radius: 5px;
+      margin: 0 0 10px 0;
+    }
+
+    /* Rooms container shows vertical columns (like your sketch) */
+    .rooms {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .room {
+      width: 70px;
+      height: 56px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      box-sizing: border-box;
+      transition: transform .12s;
+    }
+
+    .room:hover { transform: translateY(-3px); }
+
+    .room .room-no { font-size: 12px; }
+    .room .bed-icons { font-size: 14px; margin-top: 4px; }
+
+    /* colors for room types (overrideable inline too) */
+    .type-single { background: #fff3b0; }     /* yellow */
+    .type-double { background: #d9eefb; }     /* light blue */
+    .type-triple { background: #e7fadc; }     /* light green */
+
+    .room.selected { box-shadow: 0 0 0 4px rgba(2,123,255,0.12); border-color: #007bff; }
+
+    /* Booked style with big red X */
+    .room.booked {
+      background: #ffdddd !important;
+      border-color: #cc0000 !important;
+      color: #000;
+      pointer-events: none;
+      text-decoration: line-through;
+    }
+    .room.booked::after {
+      content: "✖";
+      position: absolute;
+      color: #c70000;
+      font-size: 30px;
+      top: -6px;
+      left: 14px;
+      font-weight: 900;
+    }
+
+    .bottom-section { text-align:center; margin-top:18px; }
+
+    /* responsive */
+    @media (max-width:800px){
+      .block { width: 100%; }
+      .room { width: 56px; height: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <form id="roomForm" autocomplete="off">
+    <h2>Student Details</h2>
+
+    <label>Student ID:</label>
+    <input id="studentId" type="text" required />
+
+    <label>Name:</label>
+    <input id="studentName" type="text" required />
+
+    <label>Father Name:</label>
+    <input id="fatherName" type="text" />
+
+    <label>Mother Name:</label>
+    <input id="motherName" type="text" />
+
+    <label>Email:</label>
+    <input id="email" type="email" />
+
+    <label>Permanent Address:</label>
+    <input id="address" type="text" />
+
+    <label>College Name:</label>
+    <input id="collegeName" type="text" />
+
+    <label>Aadhaar Number (Unique ID):</label>
+    <input id="aadhaar" type="text" />
+
+    <h2>Room Details</h2>
+
+    <label>Preferred Block:</label>
+    <select id="blockSelect">
+      <option value="A">Block A</option>
+      <option value="B">Block B</option>
+      <option value="C">Block C</option>
+    </select>
+
+    <label>Room Type:</label>
+    <select id="roomType">
+      <option value="Single">Single</option>
+      <option value="Double">Double</option>
+      <option value="Triple">Triple</option>
+    </select>
+
+    <div style="display:flex;gap:12px;align-items:center;">
+      <button type="button" id="checkBtn" class="check-btn">Check</button>
+      <div style="flex:1"></div>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <div class="item">🟨 Single (yellow)</div>
+      <div class="item">🟦 Double (blue)</div>
+      <div class="item">🟩 Triple (green)</div>
+      <div class="item">🟩 Available</div>
+      <div class="item">❌ Booked</div>
+      <div class="item">🔳 Selected</div>
+    </div>
+
+    <div class="grid">
+      <div class="block" id="blockArea" aria-live="polite">
+        <h3 id="blockTitle">Block A</h3>
+        <div class="rooms" id="gridContainer"></div>
+      </div>
+    </div>
+
+    <label style="margin-top:12px;">Selected Room Number:</label>
+    <input id="selectedRoom" type="text" readonly />
+
+    <div class="bottom-section">
+      <button type="submit" class="book-btn">Book Now</button>
+    </div>
+  </form>
+
+  <script>
+    // --- SETTINGS ---
+    const totalRoomsPerBlock = 20;   // change to 100 if you want more
+    const columns = 5;               // vertical columns like paper sketch
+
+    // --- ELEMENTS ---
+    const gridContainer = document.getElementById('gridContainer');
+    const checkBtn = document.getElementById('checkBtn');
+    const blockSelect = document.getElementById('blockSelect');
+    const roomTypeSelect = document.getElementById('roomType');
+    const selectedRoomInput = document.getElementById('selectedRoom');
+    const blockTitle = document.getElementById('blockTitle');
+
+    // load bookedRooms from localStorage
+    let bookedRooms = JSON.parse(localStorage.getItem('bookedRooms') || '[]');
+
+    // helper: color class for type
+    function typeClass(type) {
+      if (type === 'Single') return 'type-single';
+      if (type === 'Double') return 'type-double';
+      if (type === 'Triple') return 'type-triple';
+      return '';
+    }
+    function bedIcons(type) {
+      if (type === 'Single') return '🛏';
+      if (type === 'Double') return '🛏🛏';
+      if (type === 'Triple') return '🛏🛏🛏';
+      return '';
+    }
+
+    // Build and show the block - vertical columns as your sketch
+    function generateBlock(block) {
+      // update heading
+      blockTitle.textContent = 'Block ' + block;
+      selectedRoomInput.value = '';
+      // clear
+      gridContainer.innerHTML = '';
+
+      const rows = Math.ceil(totalRoomsPerBlock / columns);
+
+      // create columns
+      for (let col = 0; col < columns; col++) {
+        const colEl = document.createElement('div');
+        colEl.className = 'col';
+
+        for (let r = 1; r <= rows; r++) {
+          const roomIndex = r + col * rows;
+          if (roomIndex > totalRoomsPerBlock) break;
+
+          const roomNo = block + '-' + String(roomIndex).padStart(3, '0');
+
+          const roomEl = document.createElement('div');
+          roomEl.className = 'room ' + typeClass(roomTypeSelect.value);
+          roomEl.setAttribute('data-room', roomNo);
+          roomEl.innerHTML = '<div class="room-no">' + roomNo + '</div>' +
+                             '<div class="bed-icons">' + bedIcons(roomTypeSelect.value) + '</div>';
+
+          // mark booked
+          if (bookedRooms.includes(roomNo)) {
+            roomEl.classList.add('booked');
+          }
+
+          // click to select (if not booked)
+          roomEl.addEventListener('click', function () {
+            if (roomEl.classList.contains('booked')) return;
+            document.querySelectorAll('.room').forEach(r => r.classList.remove('selected'));
+            roomEl.classList.add('selected');
+            selectedRoomInput.value = roomNo;
+          });
+
+          colEl.appendChild(roomEl);
+        }
+
+        gridContainer.appendChild(colEl);
+      }
+    }
+
+    // Check button shows the selected block rooms
+    checkBtn.addEventListener('click', function () {
+      const block = blockSelect.value;
+      generateBlock(block);
+    });
+
+    // initial show: optional - show default selected block on load
+    window.addEventListener('load', () => {
+      generateBlock(blockSelect.value);
+    });
+
+    // Booking submission
+    document.getElementById('roomForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const room = selectedRoomInput.value;
+      if (!room) {
+        alert('Please select a room before booking.');
+        return;
+      }
+      if (!bookedRooms.includes(room)) {
+        bookedRooms.push(room);
+        localStorage.setItem('bookedRooms', JSON.stringify(bookedRooms));
+      }
+      // store basic booking (minimal demo)
+      const allBookings = JSON.parse(localStorage.getItem('allBookings') || '[]');
+      const booking = {
+        studentId: document.getElementById('studentId').value || '',
+        name: document.getElementById('studentName').value || '',
+        aadhaar: document.getElementById('aadhaar').value || '',
+        block: blockSelect.value,
+        roomNumber: room,
+        roomType: roomTypeSelect.value,
+        amount: 15000,
+        time: new Date().toISOString()
+      };
+      allBookings.push(booking);
+      localStorage.setItem('allBookings', JSON.stringify(allBookings));
+
+      alert('Room ' + room + ' booked successfully!');
+      // redirect to payment.html (if you have it)
+      window.location.href = 'payment.html';
+    });
+
+    // When room type changes, regenerate (if user already checked)
+    roomTypeSelect.addEventListener('change', function () {
+      // regenerate for currently selected block so colors & icons update
+      generateBlock(blockSelect.value);
+    });
+
+    // when block selection changes, update title but do not auto-generate
+    blockSelect.addEventListener('change', function () {
+      blockTitle.textContent = 'Block ' + blockSelect.value;
+    });
+    // 🟢 Booking
+document.getElementById("roomForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const studentId = document.getElementById("studentId").value;
+  const studentName = document.getElementById("studentName").value;
+  const fatherName = document.getElementById("fatherName").value;
+  const motherName = document.getElementById("motherName").value;
+  const email = document.getElementById("email").value;
+  const address = document.getElementById("address").value;
+  const collegeName = document.getElementById("collegeName").value;
+  const aadhaar = document.getElementById("aadhaar").value;
+
+  const block = document.getElementById("blockSelect").value;
+  const roomType = document.getElementById("roomType").value;
+  const selectedRoom = selectedRoomInput.value;
+
+  if (!selectedRoom) {
+    alert("Please select a room before booking.");
+    return;
+  }
+
+  // Save preview data to localStorage
+  const previewData = {
+    studentId,
+    studentName,
+    fatherName,
+    motherName,
+    email,
+    address,
+    collegeName,
+    aadhaar,
+    block,
+    roomType,
+    selectedRoom,
+    amount: 15000
+  };
+
+  localStorage.setItem("bookingPreview", JSON.stringify(previewData));
+
+  // Go to preview page
+  window.location.href = "preview.html";
+});
+  </script>
+  <br>
+  <a href="student_dashboard.html">⬅ Back to Dashboard</a>
+</body>
+</html>
